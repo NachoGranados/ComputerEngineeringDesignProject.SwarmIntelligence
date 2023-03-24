@@ -15,38 +15,41 @@ Global particles' best      : p_g = (p_g1, p_g2, ..., p_gn)
 Inertia component           : w * v_i(t)
 Cognitive component         : c_1 * r_1 * (p_i - x_i(t))
 Social component            : c_2 * r_2 * (g_i - x_i(t))
-Velocity adjustment         : v_i(t+1) <- Inertia+Cognitive+Social
-Position adjustment         : x_i(t+1) <- x_i(t)+v_i(t+1)
+Velocity adjustment         : v_i(t+1) = Inertia + Cognitive + Social
+Position adjustment         : x_i(t+1) = x_i(t) + v_i(t+1)
 """
 
 # Import libraries
 import random
-import math
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import animation
 
 # Fitness function definition
-def fitnessFunction(x1, x2):
+def fitnessFunction(x, y, xDestination, yDestination):
 
-    f1 = x1 + 2 * -x2 + 3
-    f2 = 2 * x1 + x2 - 8
-
-    z = (f1 ** 2) + (f2 ** 2)
+    aux1 = x - xDestination
+    aux2 = y - yDestination
+    z = (aux1 ** 2) + (aux2 ** 2)
 
     return z
 
 # Velocity update
-def velocityUpdate(particle, velocity, particleBest, globalBest, minWeight = 0.5, maxWeight = 1.0, c = 0.1):
+def velocityUpdate(particle, velocity, particleBest, globalBest):
+
+    # Define weights
+    minWeight = 0.5
+    maxWeight = 1.0
+    c = 0.1
 
     # Initialise new velocity array
     particleLength = len(particle)
     newVelocity = np.array([0.0 for i in range(particleLength)])
 
     # Randomly generate r1, r2 and inertia weight from normal distribution
-    r1 = random.uniform(0,maxWeight)
-    r2 = random.uniform(0,maxWeight)
-    w = random.uniform(minWeight,maxWeight)
+    r1 = random.uniform(0, maxWeight)
+    r2 = random.uniform(0, maxWeight)
+    w = random.uniform(minWeight, maxWeight)
     c1 = c
     c2 = c
 
@@ -66,7 +69,7 @@ def positionUpdate(particle, velocity):
     return newParticle
 
 # PSO main function
-def pso(population, dimension, minPosition, maxPosition, generation, fitnessCriterion, ax):
+def pso(population, dimension, minPosition, maxPosition, generation, iterMax, xDestination, yDestination, ax):
     
     # Population
     particles = [[random.uniform(minPosition, maxPosition) for j in range(dimension)] for i in range(population)]
@@ -75,7 +78,7 @@ def pso(population, dimension, minPosition, maxPosition, generation, fitnessCrit
     particleBestPosition = particles
 
     # Fitness
-    particleBestFitness = [fitnessFunction(p[0],p[1]) for p in particles]
+    particleBestFitness = [fitnessFunction(p[0], p[1], xDestination, yDestination) for p in particles]
 
     # Index of the best particle
     globalBestIndex = np.argmin(particleBestFitness)
@@ -93,7 +96,7 @@ def pso(population, dimension, minPosition, maxPosition, generation, fitnessCrit
     for t in range(generation):
 
         # Stop if the average fitness value reached a predefined success criterion
-        if np.average(particleBestFitness) <= fitnessCriterion:
+        if np.average(particleBestFitness) <= iterMax:
 
             break
 
@@ -110,11 +113,12 @@ def pso(population, dimension, minPosition, maxPosition, generation, fitnessCrit
             # Add plot for each generation (within the generation for-loop)
             image = ax.scatter3D([particles[n][0] for n in range(population)],
                                  [particles[n][1] for n in range(population)],
-                                 [fitnessFunction(particles[n][0],particles[n][1]) for n in range(population)], c = "b")
+                                 [fitnessFunction(particles[n][0], particles[n][1], xDestination, yDestination)
+                                  for n in range(population)], c = "b")
             images.append([image])
 
             # Calculate the fitness value
-            particleBestFitness = [fitnessFunction(p[0],p[1]) for p in particles]
+            particleBestFitness = [fitnessFunction(p[0], p[1], xDestination, yDestination) for p in particles]
 
             # Find the index of the best particle
             globalBestIndex = np.argmin(particleBestFitness)
@@ -131,12 +135,16 @@ def pso(population, dimension, minPosition, maxPosition, generation, fitnessCrit
     return images
 
 # Set PSO parameters
-population = 100
+population = 10
 dimension = 2
-minPosition = -100.0
-maxPosition = 100.0
+minPosition = -1000.0
+maxPosition = 1000.0
 generation = 400
-fitnessCriterion = 10e-4
+iterMax = 10e-4
+
+# Set Fitness parameters
+xDestination = 500
+yDestination = 100
 
 # Plotting preparation
 figure = plt.figure(figsize=(8, 8))
@@ -150,12 +158,12 @@ x = np.linspace(minPosition, maxPosition, 80)
 y = np.linspace(minPosition, maxPosition, 80)
 
 X, Y = np.meshgrid(x, y)
-Z = fitnessFunction(X,Y)
+Z = fitnessFunction(X, Y, xDestination, yDestination)
 
 ax.plot_wireframe(X, Y, Z, color = "r", linewidth = 0.2)
 
 # Run PSO algorithm
-images = pso(population, dimension, minPosition, maxPosition, generation, fitnessCriterion, ax)
+images = pso(population, dimension, minPosition, maxPosition, generation, iterMax, xDestination, yDestination, ax)
 
 # Generate the animation and save it
 animated_image = animation.ArtistAnimation(figure, images, interval = 125, blit = True)
