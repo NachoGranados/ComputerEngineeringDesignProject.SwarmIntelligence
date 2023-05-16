@@ -1,0 +1,25 @@
+
+
+GRAVITY = -9.8
+MASS = 1
+
+REFERENCE_COLOR = [4, 1, 1, 1]
+WALL_COLOR = [0, 1, 1, 1]
+
+ORIGIN_ORIENTATION = [0, 0, 0, 1]
+VERTICAL_ORIENTATION = [0, 1, 0, 1]
+HORIZONTAL_ORIENTATION = [0, 0, 1, 1]
+
+
+
+
+
+
+
+
+
+
+
+
+
+

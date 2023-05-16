@@ -384,25 +384,6 @@ boxId = p.createMultiBody(mass,
                           basePosition,
                           baseOrientation)
 
-# Length 9 --------------------------------------------------
-
-dimensions = [0.25, 11.25, 2]
-
-boxCollisionId = p.createCollisionShape(shapeType = p.GEOM_BOX,
-                                        halfExtents = dimensions)
-
-boxVisualId = p.createVisualShape(shapeType = p.GEOM_BOX,
-                                  halfExtents = dimensions,
-                                  rgbaColor = color)
-
-basePosition = [-7, -22, 2]
-
-boxId = p.createMultiBody(mass,
-                          boxCollisionId,
-                          boxVisualId,
-                          basePosition,
-                          baseOrientation)
-
 # Length 11 --------------------------------------------------
 
 dimensions = [0.25, 11, 2]
@@ -415,6 +396,25 @@ boxVisualId = p.createVisualShape(shapeType = p.GEOM_BOX,
                                   rgbaColor = color)
 
 basePosition = [11, 14, 2]
+
+boxId = p.createMultiBody(mass,
+                          boxCollisionId,
+                          boxVisualId,
+                          basePosition,
+                          baseOrientation)
+
+# Length 11.25 --------------------------------------------------
+
+dimensions = [0.25, 11.25, 2]
+
+boxCollisionId = p.createCollisionShape(shapeType = p.GEOM_BOX,
+                                        halfExtents = dimensions)
+
+boxVisualId = p.createVisualShape(shapeType = p.GEOM_BOX,
+                                  halfExtents = dimensions,
+                                  rgbaColor = color)
+
+basePosition = [-7, -22, 2]
 
 boxId = p.createMultiBody(mass,
                           boxCollisionId,
