@@ -4,9 +4,6 @@ import time
 import numpy as np
 import pybullet as p
 import pybullet_data
-
-from matplotlib import pyplot as plt
-from matplotlib import animation
 from constants import *
 
 # Particle class definition
@@ -373,9 +370,19 @@ createEnvironment()
 population = 10
 
 # Swarm initialization
-swarm = Swarm(population)
+#swarm = Swarm(population)
 
 # Run PSO algorithm
-pso(swarm)
+#pso(swarm)
+
+while(True):
+
+    # Swarm initialization
+    swarm = Swarm(population)
+
+    # Run PSO algorithm
+    pso(swarm)
+
+    swarm = []
 
 p.disconnect()
