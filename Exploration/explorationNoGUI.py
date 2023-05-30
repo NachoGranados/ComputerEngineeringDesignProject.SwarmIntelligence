@@ -177,7 +177,7 @@ def pso(swarm):
         else:
 
             for p in swarm.getSwarm():
-
+                
                 # Update the velocity of each particle
                 p.updateVelocity(swarm.getBestParticle())
 
@@ -405,9 +405,10 @@ class Window(tkinter.Tk):
 
         p.disconnect()
 
-        messagebox.showinfo("Estadisticas", "Global Best Position:\n(" + str(statistics[0][0]) + ", " + str(statistics[0][1]) + ")\n\n"
-                                            "Best Fitness Value: " + str(statistics[1]) + "\n\n" +
-                                            "Number of Iterations: " + str(statistics[2]))
+        messagebox.showinfo("Estadisticas", "Cantidad de drones: " + str(population) + "\n\n" + 
+                                            "Mejor posicion global:\n(" + str(statistics[0][0]) + ", " + str(statistics[0][1]) + ")\n\n" + 
+                                            "Mejor valor de fitness: " + str(statistics[1]) + "\n\n" +
+                                            "Numero de iteraciones: " + str(statistics[2]))
 
 # Tkinter main window loop
 Window().mainloop()

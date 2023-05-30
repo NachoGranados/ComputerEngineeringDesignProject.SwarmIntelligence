@@ -1,9 +1,13 @@
 # Import libraries
 import random
+import math
 import time
 import numpy as np
 import pybullet as p
 import pybullet_data
+import tkinter
+from tkinter import *
+from tkinter import messagebox
 from constants import *
 
 # Particle class definition
@@ -18,6 +22,8 @@ class Particle:
         self.bestPositionY = positionY
         self.velocityX = 0.0
         self.velocityY = 0.0
+        self.rayFrom = []
+        self.rayTo = []
 
         # Fitness criteria
         f1 = (self.positionX - PI) ** 2
@@ -48,12 +54,64 @@ class Particle:
     # Update position function definition
     def updatePosition(self):
 
+        for i in range(NUMBER_RAYS):
+            
+            self.rayFrom.append([self.positionX, self.positionY, self.positionZ])
+
+            self.rayTo.append([math.sin(2. * math.pi * float(i) / NUMBER_RAYS) + self.positionX,
+                               math.cos(2. * math.pi * float(i) / NUMBER_RAYS) + self.positionY,
+                               self.positionZ])
+
+        for j in range(NUMBER_RAYS):
+            
+            results = p.rayTestBatch(self.rayFrom, self.rayTo, j + 1)
+
+        hitFlag = False
+
+        counter = 0
+
+        for k in range(NUMBER_RAYS):
+            
+            hitObject = results[k][0]
+
+            if(hitObject >= 0):
+
+                print("HIT OBJECT: ", hitObject)
+
+                hitFlag = True
+
+                counter += 1
+                
+        if(hitFlag == False):
+
+            self.positionX += self.velocityX
+            self.positionY += self.velocityY
+
+            newPosition = [self.positionX, self.positionY, self.positionZ]
+
+            p.resetBasePositionAndOrientation(self.drone, newPosition, self.orientation)
+
+        else:
+
+            #print("HIT - COUNTER = ", counter)
+
+            pass
+
+
+
+        self.rayFrom = []
+        self.rayTo = []
+
+        """
+
         self.positionX += self.velocityX
         self.positionY += self.velocityY
 
         newPosition = [self.positionX, self.positionY, self.positionZ]
 
         p.resetBasePositionAndOrientation(self.drone, newPosition, self.orientation)
+
+        """
 
     # Update fitness function definition
     def updateFitness(self):
@@ -117,7 +175,7 @@ class Swarm:
 
         self.bestParticle = self.swarm[0]
 
-        # update best particle
+        # Update best particle
         swarmFitness = []
 
         for p in self.swarm:            
@@ -161,7 +219,7 @@ class Swarm:
 # PSO function definition
 def pso(swarm):
 
-    iteration = 0
+    iterations = 0
 
     # Infinite loop
     while True:
@@ -174,7 +232,7 @@ def pso(swarm):
         else:
 
             for p in swarm.getSwarm():
-
+                
                 # Update the velocity of each particle
                 p.updateVelocity(swarm.getBestParticle())
 
@@ -189,14 +247,12 @@ def pso(swarm):
 
         time.sleep(0.1)
 
-        iteration += 1
+        iterations += 1
 
-    # Print the results
-    print("\n")
-    print("Global Best Position: ", [swarm.getBestParticle().getPositionX(), swarm.getBestParticle().getPositionY()])
-    print("Best Fitness Value: ", swarm.getBestParticle().getFitness())
-    print("Number of Iterations: ", iteration)
-    print("\n")
+    globalBestPosition = [swarm.getBestParticle().getPositionX(), swarm.getBestParticle().getPositionY()]
+    bestFitnessValue = swarm.getBestParticle().getFitness()
+    
+    return [globalBestPosition, bestFitnessValue, iterations]
 
 # Create wall function definition
 def createWall(dimensions, color, basePosition, baseOrientation):
@@ -354,35 +410,58 @@ def createEnvironment():
 
     createWall(dimensions, WALL_COLOR, basePosition, HORIZONTAL_ORIENTATION)
 
-# GUI preparation
-p.connect(p.GUI)
-p.setAdditionalSearchPath(pybullet_data.getDataPath())
+# Tkinter main window
+class Window(tkinter.Tk):
 
-p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
+    def __init__(self):
 
-p.setRealTimeSimulation(1)
-p.setGravity(0, 0, GRAVITY)
+        tkinter.Tk.__init__(self)
+        
+        self.title("Drones con Inteligencia de Enjambre")
+        self.geometry("400x200")
+        
+        self.label = Label(self, text = "Indique la cantidad\nde drones a simular", fg ='#4285f4', font = ("Serif", 14))
+        self.label.place(x = 100, y = 20)
 
-createEnvironment()
+        self.entryPopulation = Entry(self, width = 20, justify = CENTER, font = ("Serif", 14))
+        self.entryPopulation.place(x = 75, y = 80)
+        
+        self.buttonStart = Button(self, text = "Iniciar", fg = "white", bg = "#4285f4", font = ("Serif", 14),
+                                  width = 15, heigh = 1, command = self.startSimulation)
+        self.buttonStart.place(x = 100, y = 120)
 
-# Population size
-population = 10
+    def startSimulation(self):
+        
+        # Population size
+        population = int(self.entryPopulation.get())
 
-# Swarm initialization
-#swarm = Swarm(population)
+        # Close Tkinter window
+        self.destroy()
 
-# Run PSO algorithm
-#pso(swarm)
+        # Pybullet GUI preparation
+        p.connect(p.GUI)
+        p.setAdditionalSearchPath(pybullet_data.getDataPath())
 
-while(True):
+        p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_MOUSE_PICKING, 0)
 
-    # Swarm initialization
-    swarm = Swarm(population)
+        p.setRealTimeSimulation(1)
+        p.setGravity(0, 0, GRAVITY)
 
-    # Run PSO algorithm
-    pso(swarm)
+        createEnvironment()
 
-    swarm = []
+        # Swarm initialization
+        swarm = Swarm(population)
 
-p.disconnect()
+        # Run PSO algorithm
+        statistics = pso(swarm)
+
+        p.disconnect()
+
+        messagebox.showinfo("Estadisticas", "Cantidad de drones: " + str(population) + "\n\n" + 
+                                            "Mejor posicion global:\n(" + str(statistics[0][0]) + ", " + str(statistics[0][1]) + ")\n\n" + 
+                                            "Mejor valor de fitness: " + str(statistics[1]) + "\n\n" +
+                                            "Numero de iteraciones: " + str(statistics[2]))
+
+# Tkinter main window loop
+Window().mainloop()
