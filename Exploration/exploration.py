@@ -76,8 +76,6 @@ class Particle:
 
             if(hitObject >= 0):
 
-                print("HIT OBJECT: ", hitObject)
-
                 hitFlag = True
 
                 counter += 1
@@ -93,25 +91,12 @@ class Particle:
 
         else:
 
-            #print("HIT - COUNTER = ", counter)
+            # Logic of collision detection
 
             pass
 
-
-
         self.rayFrom = []
         self.rayTo = []
-
-        """
-
-        self.positionX += self.velocityX
-        self.positionY += self.velocityY
-
-        newPosition = [self.positionX, self.positionY, self.positionZ]
-
-        p.resetBasePositionAndOrientation(self.drone, newPosition, self.orientation)
-
-        """
 
     # Update fitness function definition
     def updateFitness(self):
@@ -245,7 +230,7 @@ def pso(swarm):
         # Update the best particle
         swarm.updateBestParticle()
 
-        time.sleep(0.1)
+        time.sleep(0.15)
 
         iterations += 1
 
@@ -450,11 +435,15 @@ class Window(tkinter.Tk):
 
         createEnvironment()
 
+        time.sleep(3)
+
         # Swarm initialization
         swarm = Swarm(population)
 
         # Run PSO algorithm
         statistics = pso(swarm)
+
+        time.sleep(3)
 
         p.disconnect()
 

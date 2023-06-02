@@ -155,10 +155,7 @@ class Swarm:
         self.bestParticle = self.swarm[bestParticleIndex]
         
 # PSO function definition
-def pso(swarm, gif):
-
-    # Animation image placeholder
-    images = []
+def pso(swarm):
 
     # Loop for the number of generation
     for g in range(GENERATION):
@@ -177,12 +174,6 @@ def pso(swarm, gif):
 
                 # Update the position of each particle
                 p.updatePosition()
-            
-            # Add plot for each generation (within the generation for-loop)
-            image = gif.scatter3D([i.getPositionX() for i in swarm.getSwarm()],
-                                  [j.getPositionY() for j in swarm.getSwarm()],
-                                  [k.getFitness() for k in swarm.getSwarm()], c = "b")
-            images.append([image])
 
             # Update fitness for each particle
             swarm.updateSwarmFitness()
@@ -195,36 +186,6 @@ def pso(swarm, gif):
     print("Best Fitness Value: ", swarm.getBestParticle().getFitness())
     print("Number of Generation: ", g)
 
-    return images
-
-# Fitness criteria function definition
-def fitnessCriteria(x, y):
-
-    f1 = (x - PI) ** 2
-    f2 = (y - EULER) ** 2
-    f3 = np.sin(3 * x + FIRST_PARAMETER)
-    f4 = np.sin(4 * y + SECOND_PARAMETER)
-
-    z = f1 + f2 + f3 + f4
-
-    return z
-
-# Plotting preparation
-figure = plt.figure(figsize=(8, 8))
-
-gif = figure.add_subplot(111, projection="3d")
-gif.set_xlabel("x")
-gif.set_ylabel("y")
-gif.set_zlabel("z")
-
-x = np.linspace(MIN_POSITION, MAX_POSITION, 80)
-y = np.linspace(MIN_POSITION, MAX_POSITION, 80)
-
-X, Y = np.meshgrid(x, y)
-Z = fitnessCriteria(X, Y)
-
-gif.plot_wireframe(X, Y, Z, color = "r", linewidth = 0.2)
-
 # Population size
 population = 10
 
@@ -232,10 +193,4 @@ population = 10
 swarm = Swarm(population)
 
 # Run PSO algorithm
-images = pso(swarm, gif)
-
-# Generate the animation and save it
-animated_image = animation.ArtistAnimation(figure, images, interval = 125, blit = True)
-
-# Show animation
-plt.show()
+pso(swarm)

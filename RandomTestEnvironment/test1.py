@@ -1,46 +1,76 @@
 import pybullet as p
-import pybullet_data
 import time
+import pybullet_data
 
-physicsClient = p.connect(p.GUI) # or p.DIRECT for non-graphical version
-p.setAdditionalSearchPath(pybullet_data.getDataPath()) # optionally
-#p.setGravity(0,0,-9.8)
-p.setGravity(0,0,0)
-p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)
-planeId = p.loadURDF("plane.urdf")
+p.connect(p.GUI)
+p.setAdditionalSearchPath(pybullet_data.getDataPath())
+p.createCollisionShape(p.GEOM_PLANE)
+p.createMultiBody(0, 0)
 
-robot1StartPos = [0, 0, 1]
-robot1StartOrientation = p.getQuaternionFromEuler([0, 0, 0])
-robot1Id = p.loadURDF("block.urdf", robot1StartPos, robot1StartOrientation)
+sphereRadius = 0.05
+colSphereId = p.createCollisionShape(p.GEOM_SPHERE, radius=sphereRadius)
+colBoxId = p.createCollisionShape(p.GEOM_BOX,
+                                  halfExtents=[sphereRadius, sphereRadius, sphereRadius])
 
+mass = 1
+visualShapeId = -1
 
+link_Masses = [1]
+linkCollisionShapeIndices = [colBoxId]
+linkVisualShapeIndices = [-1]
+linkPositions = [[0, 0, 0.11]]
+linkOrientations = [[0, 0, 0, 1]]
+linkInertialFramePositions = [[0, 0, 0]]
+linkInertialFrameOrientations = [[0, 0, 0, 1]]
+indices = [0]
+jointTypes = [p.JOINT_REVOLUTE]
+axis = [[0, 0, 1]]
+
+for i in range(3):
+  for j in range(3):
+    for k in range(3):
+      basePosition = [
+          1 + i * 5 * sphereRadius, 1 + j * 5 * sphereRadius, 1 + k * 5 * sphereRadius + 1
+      ]
+      baseOrientation = [0, 1, 0, 1]
+      if (k & 2):
+        sphereUid = p.createMultiBody(mass, colSphereId, visualShapeId, basePosition,
+                                      baseOrientation)
+      else:
+        sphereUid = p.createMultiBody(mass,
+                                      colBoxId,
+                                      visualShapeId,
+                                      basePosition,
+                                      baseOrientation,
+                                      linkMasses=link_Masses,
+                                      linkCollisionShapeIndices=linkCollisionShapeIndices,
+                                      linkVisualShapeIndices=linkVisualShapeIndices,
+                                      linkPositions=linkPositions,
+                                      linkOrientations=linkOrientations,
+                                      linkInertialFramePositions=linkInertialFramePositions,
+                                      linkInertialFrameOrientations=linkInertialFrameOrientations,
+                                      linkParentIndices=indices,
+                                      linkJointTypes=jointTypes,
+                                      linkJointAxis=axis)
+    """
+      p.changeDynamics(sphereUid,
+                       -1,
+                       spinningFriction=0.001,
+                       rollingFriction=0.001,
+                       linearDamping=0.0)
+      for joint in range(p.getNumJoints(sphereUid)):
+        p.setJointMotorControl2(sphereUid, joint, p.VELOCITY_CONTROL, targetVelocity=1, force=10)
 """
-robot2StartPos = [0, 2, 0]
-robot2StartOrientation = p.getQuaternionFromEuler([0, 0, -1])
-robot2Id = p.loadURDF("husky/husky.urdf", robot2StartPos, robot2StartOrientation)
 
-robot3StartPos = [2, 0, 0]
-robot3StartOrientation = p.getQuaternionFromEuler([0, 0, 1])
-robot3Id = p.loadURDF("husky/husky.urdf", robot3StartPos, robot3StartOrientation)
+p.setGravity(0, 0, -10)
+p.setRealTimeSimulation(1)
 
-robot4StartPos = [0, -2, 0]
-robot4StartOrientation = p.getQuaternionFromEuler([0, 0, -1])
-robot4Id = p.loadURDF("husky/husky.urdf", robot4StartPos, robot4StartOrientation)
+p.getNumJoints(sphereUid)
+for i in range(p.getNumJoints(sphereUid)):
+  p.getJointInfo(sphereUid, i)
 
-robot5StartPos = [-2, 0, 0]
-robot5StartOrientation = p.getQuaternionFromEuler([0, 0, 1])
-robot5Id = p.loadURDF("husky/husky.urdf", robot5StartPos, robot5StartOrientation)
+while (1):
+  keys = p.getKeyboardEvents()
+  print(keys)
 
-
-robotsIdList = [robot1Id, robot2Id, robot4Id, robot4Id]
-"""
-
-#x = 0.0
-#y = 0.0
-
-for i in range(10000):
-
-        p.stepSimulation()
-        time.sleep(1./240.)
-
-p.disconnect()
+  time.sleep(0.01)

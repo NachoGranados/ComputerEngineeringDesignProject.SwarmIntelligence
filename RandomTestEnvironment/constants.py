@@ -1,5 +1,3 @@
-
-
 GRAVITY = 0
 MASS = 0
 

@@ -190,7 +190,7 @@ def pso(swarm):
         # Update the best particle
         swarm.updateBestParticle()
 
-        time.sleep(0.1)
+        time.sleep(0.15)
 
         iterations += 1
 
@@ -383,8 +383,6 @@ class Window(tkinter.Tk):
         # Close Tkinter window
         self.destroy()
 
-        statistics = ["hola1", "hola2", "hola3"]
-
         # Pybullet GUI preparation
         p.connect(p.GUI)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -397,13 +395,17 @@ class Window(tkinter.Tk):
 
         createEnvironment()
 
+        time.sleep(3)
+
         # Swarm initialization
         swarm = Swarm(population)
 
         # Run PSO algorithm
         statistics = pso(swarm)
 
-        p.disconnect()
+        time.sleep(3)
+
+        p.disconnect()        
 
         messagebox.showinfo("Estadisticas", "Cantidad de drones: " + str(population) + "\n\n" + 
                                             "Mejor posicion global:\n(" + str(statistics[0][0]) + ", " + str(statistics[0][1]) + ")\n\n" + 
