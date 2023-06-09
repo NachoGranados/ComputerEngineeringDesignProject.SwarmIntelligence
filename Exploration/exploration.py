@@ -118,7 +118,6 @@ class Particle:
             
             self.bestPositionX = self.positionX
             self.bestPositionY = self.positionY
-            
 
     # Update velocity function definition
     def updateVelocity(self, bestParticle):    
